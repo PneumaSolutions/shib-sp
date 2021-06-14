@@ -33,7 +33,7 @@ def shim():
     if member_of:
         claims["member_of"] = member_of.split(";")
     token = jwt.encode(claims, os.environ["SAML_SHIM_SECRET"], "HS256")
-    return redirect("/auth/saml/callback?token=%s" % urllib.parse.quote(token))
+    return redirect("/auth/saml/callback?token=%s&state=%s" % (urllib.parse.quote(token), urllib.parse.quote(request.args.get("state", ""))))
 
 
 application = app
