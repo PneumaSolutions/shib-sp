@@ -33,7 +33,14 @@ def shim():
     if member_of:
         claims["member_of"] = member_of.split(";")
     token = jwt.encode(claims, os.environ["SAML_SHIM_SECRET"], "HS256")
-    return redirect("/auth/saml/callback?token=%s&state=%s" % (urllib.parse.quote(token), urllib.parse.quote(request.args.get("state", ""))))
+    url = "/auth/saml/callback?token=%s&state=%s" % (urllib.parse.quote(token), urllib.parse.quote(request.args.get("state", "")))
+    allowed_hosts = [os.environ["ENDPOINT_HOST"]]
+    if "ALT_ENDPOINT_HOST" in os.environ:
+        allowed_hosts.append(os.environ["ALT_ENDPOINT_HOST"])
+    host = request.args.get("host")
+    if host in allowed_hosts:
+        url = "https://%s%s" % (host, url)
+    return redirect(url)
 
 
 application = app
