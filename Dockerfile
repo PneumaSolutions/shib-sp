@@ -1,4 +1,4 @@
-FROM centos:centos8
+FROM redhat/ubi8:8.4-206.1626828523@sha256:091ad37a5a638af2c21d01c2d3f4d489c2368070a6c43371e897013fb0987e49
 
 # Define args and set a default value
 ARG maintainer=pneumasolutions
@@ -17,7 +17,7 @@ LABEL Build docker build --rm --tag $maintainer/$imagename .
 RUN ln -sf /usr/share/zoneinfo/UTC /etc/localtime \
     && echo "NETWORKING=yes" > /etc/sysconfig/network
 
-RUN rm -fr /var/cache/yum/* && yum clean all && yum -y install --setopt=tsflags=nodocs epel-release && yum -y update && \
+RUN rm -fr /var/cache/yum/* && yum clean all && yum -y install --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && yum -y update && \
     yum -y install net-tools wget curl tar unzip man vim httpd python38 python38-mod_wsgi supervisor && \
     yum clean all
 
