@@ -37,6 +37,8 @@ def shim():
     allowed_hosts = [os.environ["ENDPOINT_HOST"]]
     if "ALT_ENDPOINT_HOST" in os.environ:
         allowed_hosts.append(os.environ["ALT_ENDPOINT_HOST"])
+    elif "ALT_ENDPOINT_HOSTS" in os.environ:
+        allowed_hosts.extend(os.environ["ALT_ENDPOINT_HOSTS"].split())
     host = request.args.get("host")
     if host in allowed_hosts:
         url = "https://%s%s" % (host, url)
