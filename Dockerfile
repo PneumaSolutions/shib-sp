@@ -1,4 +1,9 @@
-FROM redhat/ubi8:8.4-206.1626828523@sha256:091ad37a5a638af2c21d01c2d3f4d489c2368070a6c43371e897013fb0987e49
+ARG BASE_REGISTRY=docker.io
+ARG BASE_IMAGE=redhat/ubi8
+ARG BASE_TAG=8.7
+ARG BASE_SHA256=8be695c0f81d39eaaf674186183210a8b36e914a9a89420085629f2235aa5f7d
+
+FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}@sha256:${BASE_SHA256}
 
 # Define args and set a default value
 ARG maintainer=pneumasolutions
@@ -17,15 +22,18 @@ LABEL Build docker build --rm --tag $maintainer/$imagename .
 RUN ln -sf /usr/share/zoneinfo/UTC /etc/localtime \
     && echo "NETWORKING=yes" > /etc/sysconfig/network
 
-RUN rm -fr /var/cache/yum/* && yum clean all && yum -y install --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && yum -y update && \
-    yum -y install net-tools wget curl tar unzip man vim httpd python38 python38-mod_wsgi supervisor && \
-    yum clean all
+RUN rm -fr /var/cache/yum/* && yum clean all && \
+    rpm --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8 && \
+    dnf -y install --setopt=tsflags=nodocs https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
+    dnf -y update && \
+    dnf -y install net-tools wget curl tar unzip man vim httpd python39 python39-mod_wsgi supervisor && \
+    dnf clean all
 
 #install shibboleth, cleanup httpd
 RUN curl -o /etc/yum.repos.d/security:shibboleth.repo \
       http://download.opensuse.org/repositories/security://shibboleth/CentOS_8/security:shibboleth.repo \
-      && yum -y install shibboleth.x86_64 \
-      && yum clean all \
+      && dnf -y install shibboleth.x86_64 \
+      && dnf clean all \
       && rm /etc/httpd/conf.d/autoindex.conf \
       && rm /etc/httpd/conf.d/userdir.conf \
       && rm /etc/httpd/conf.d/welcome.conf
@@ -60,7 +68,7 @@ ADD system/generate_shibboleth_config.py /usr/local/bin/
 
 # Set up the WSGI app
 ADD app/requirements.txt /app/
-RUN python3.8 -m venv /app/env \
+RUN python3.9 -m venv /app/env \
     && . /app/env/bin/activate \
     && python -m pip install -U pip==21.0.1 \
     && pip install -r /app/requirements.txt
