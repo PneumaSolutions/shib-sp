@@ -1,4 +1,4 @@
-FROM redhat/ubi8:8.4-206.1626828523@sha256:091ad37a5a638af2c21d01c2d3f4d489c2368070a6c43371e897013fb0987e49
+FROM redhat/ubi8:8.7-1112@sha256:e3311058176628ad7f0f288f894ed2afef61be77ad01d53d5b69bca0f6b6cec1
 
 # Define args and set a default value
 ARG maintainer=pneumasolutions
@@ -9,7 +9,7 @@ MAINTAINER $maintainer
 LABEL Vendor="Pneuma Solutions"
 LABEL ImageType="Base"
 LABEL ImageName=$imagename
-LABEL ImageOS=centos8
+LABEL ImageOS=redhat8
 LABEL Version=$version
 
 LABEL Build docker build --rm --tag $maintainer/$imagename .
@@ -22,9 +22,8 @@ RUN rm -fr /var/cache/yum/* && yum clean all && yum -y install --setopt=tsflags=
     yum clean all
 
 #install shibboleth, cleanup httpd
-RUN curl -o /etc/yum.repos.d/security:shibboleth.repo \
-      http://download.opensuse.org/repositories/security://shibboleth/CentOS_8/security:shibboleth.repo \
-      && yum -y install shibboleth.x86_64 \
+COPY system/shib-sp.repo /etc/yum.repos.d/shib-sp.repo
+RUN yum -y install shibboleth.x86_64 \
       && yum clean all \
       && rm /etc/httpd/conf.d/autoindex.conf \
       && rm /etc/httpd/conf.d/userdir.conf \
